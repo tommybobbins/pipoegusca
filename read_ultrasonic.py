@@ -4,6 +4,7 @@ import pifacedigitalio
 import time
 import datetime
 import os
+import syslog
 from os import path, access, R_OK
 
 f = open('/usr/local/catcam/catlog.txt','a')
@@ -30,13 +31,14 @@ def woo_woo():
 def detect_cat():
     input_on_off=pifacedigital.input_pins[7].value
     if (input_on_off == 1):
-        f.write ('Input %i is %i\n' % (7,input_on_off)) 
+#        f.write ('Input %i is %i\n' % (7,input_on_off)) 
+        syslog.syslog('Input %i is %i\n' % (7,input_on_off)) 
         take_picture_on_trigger(7) 
 	
 
 def take_picture_on_trigger(pin):
-        TIMESTAMP=datetime.datetime.now().strftime("%Y%m%d%H%M")
-	f.write(TIMESTAMP)
+        TIMESTAMP=datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+#	f.write(TIMESTAMP)
         # We need to check whether we have to switch on the lights
         #
         if path.isfile(PATH):
@@ -48,6 +50,7 @@ def take_picture_on_trigger(pin):
         time.sleep(TIME_TO_SLEEP_AFTER_FIRING)
         if path.isfile(PATH):
             os.system("/usr/local/bin/switch_off_lights.sh")
+#        f.write ('Finished taking picture') 
 
 
 pifacedigitalio.init()
