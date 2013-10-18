@@ -7,7 +7,7 @@ import os
 import syslog
 from os import path, access, R_OK
 
-f = open('/usr/local/catcam/catlog.txt','a')
+#f = open('/usr/local/catcam/catlog.txt','a')
 TIME_TO_SLEEP_AFTER_FIRING=10
 SQUIRT_TIME=3
 OUTPUT_RANGE = LED_RANGE = INPUT_RANGE = 8
