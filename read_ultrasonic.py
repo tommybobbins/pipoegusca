@@ -15,17 +15,17 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 
-# 17 = Relay 1, 27 = Relay 2, 22 = Relay 3#
-# 17 = Lights
+# 22 = Lights
 # 27 = Water Pistol
-# 22 = Ultrasonic
+# 17 = Ultrasonic
+# 22 = Relay 1, 27 = Relay 2, 17 = Relay 3
 GPIO.setup(25, GPIO.IN,pull_up_down=GPIO.PUD_UP)
 
-GPIO.setup(17, GPIO.OUT)
-GPIO.output(17,True)
+GPIO.setup(22, GPIO.OUT)
+GPIO.output(22,True)
 GPIO.setup(27, GPIO.OUT)
 GPIO.output(27,True)
-#GPIO.setup(22, GPIO.OUT)
+#GPIO.setup(17, GPIO.OUT)
 state = GPIO.input(25)
 last_state = 1
 
@@ -34,7 +34,10 @@ def detect_cat(state,last_state):
     if (state != last_state) and (state == 0):
         logging.info("State has changed to zero (%s)" % state)
         cannon_allow = redthis.get('permission_to_fire')
-        GPIO.output(17,False)
+        lights_on = redthis.get('lights/monolith/state')
+        GPIO.output(22,False)
+        if (lights_on != "On"):
+	    os.system("/usr/local/bin/switch_lights.sh on &")
         TIMESTAMP=datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 	os.system("/usr/bin/raspivid -o /home/pi/CATCAM_DIR/catcam%s.h264 -t 12000 &" % TIMESTAMP)
         if (cannon_allow == "True"):
@@ -43,9 +46,11 @@ def detect_cat(state,last_state):
             sleep(1)
             GPIO.output(27,True) # Stop water pistol after 1 second
         sleep(10)
-        GPIO.output(17,True) # Switch off lights after 10 seconds
+        GPIO.output(22,True) # Switch off lights after 10 seconds
         sleep(20)
         last_state = state
+        if (lights_on != "On"):
+	    os.system("/usr/local/bin/switch_lights.sh off &")
     else:
         last_state = state
     return last_state
@@ -58,7 +63,7 @@ while True:
         last_state = detect_cat(state,last_state)
         sleep (0.1)
     except KeyboardInterrupt:
-        GPIO.output(17,True)
+        GPIO.output(22,True)
         GPIO.output(27,True)
         GPIO.cleanup()
 #    except:
